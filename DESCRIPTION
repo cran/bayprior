@@ -1,6 +1,6 @@
 Package: bayprior
 Title: Bayesian Prior Elicitation and Diagnostics for Clinical Trials
-Version: 0.3.0
+Version: 0.3.2
 Authors@R: 
     person("Ndoh", "Penn", email = "ndohpenn9@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0003-9054-465X"))
@@ -40,8 +40,8 @@ Language: en-GB
 RoxygenNote: 7.3.3
 SystemRequirements: Quarto CLI (>= 1.5, https://quarto.org)
 NeedsCompilation: no
-Packaged: 2026-07-30 13:03:47 UTC; ndohpenn
+Packaged: 2026-08-19 12:37:00 UTC; ndohpenn
 Author: Ndoh Penn [aut, cre] (ORCID: <https://orcid.org/0009-0003-9054-465X>)
 Maintainer: Ndoh Penn <ndohpenn9@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-07-30 15:20:02 UTC
+Date/Publication: 2026-08-19 14:10:03 UTC

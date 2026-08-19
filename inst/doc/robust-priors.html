@@ -12,7 +12,7 @@
 
 <meta name="author" content="Ndoh Penn" />
 
-<meta name="date" content="2026-07-30" />
+<meta name="date" content="2026-08-19" />
 
 <title>Robust, Sceptical, and Power Priors</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust, Sceptical, and Power Priors</h1>
 <h4 class="author">Ndoh Penn</h4>
-<h4 class="date">2026-07-30</h4>
+<h4 class="date">2026-08-19</h4>
 
 
 <div id="TOC">
@@ -523,9 +523,9 @@ Adjust with <code>vague_sd</code>:</p>
 the view of a conservative regulator who is sceptical of a treatment
 effect. It is centred at the null value of the treatment effect with
 width calibrated to a chosen strength of scepticism.</p>
-<p>This is the FDA’s recommended sensitivity prior for trials using
-informative priors: the trial conclusions should hold even under a prior
-that places most mass at “no effect.”</p>
+<p>This sensitivity prior follows Spiegelhalter and Freedman’s (1994)
+approach for trials using informative priors: the trial conclusions
+should hold even under a prior that places most mass at “no effect.”</p>
 </div>
 <div id="normal-family-mean-differences-log-odds-ratios" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Normal Family (Mean
@@ -618,8 +618,9 @@ rate, not a difference:</p>
 <div id="enthusiastic-vs-sceptical-pair" class="section level2" number="3.5">
 <h2><span class="header-section-number">3.5</span> Enthusiastic vs
 Sceptical Pair</h2>
-<p>The FDA recommends presenting conclusions under both an enthusiastic
-prior (favouring treatment benefit) and a sceptical prior:</p>
+<p>A common regulatory sensitivity practice is to present conclusions
+under both an enthusiastic prior (favouring treatment benefit) and a
+sceptical prior, following Spiegelhalter and Freedman (1994):</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>enthusiastic <span class="ot">&lt;-</span> <span class="fu">elicit_beta</span>(</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="at">mean =</span> <span class="fl">0.45</span>, <span class="at">sd =</span> <span class="fl">0.08</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;moments&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Response rate (enthusiastic)&quot;</span></span>
@@ -742,7 +743,7 @@ Alternative Prior</h1>
 <span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="st">&quot;Mild conflict detected&quot;</span>,</span>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    <span class="st">&quot;Severe conflict detected&quot;</span>,</span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>    <span class="st">&quot;Historical data available&quot;</span>,</span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>    <span class="st">&quot;FDA enthusiastic/sceptical pair required&quot;</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>    <span class="st">&quot;Enthusiastic/sceptical pair for sensitivity analysis&quot;</span></span>
 <span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>  ),</span>
 <span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>  <span class="st">`</span><span class="at">Recommended prior</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
 <span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>    <span class="st">&quot;Robust mixture (w = 0.20)&quot;</span>,</span>
@@ -755,8 +756,8 @@ Alternative Prior</h1>
 <span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>), <span class="at">align =</span> <span class="st">&quot;ll&quot;</span>)</span></code></pre></div>
 <table>
 <colgroup>
-<col width="54%" />
-<col width="45%" />
+<col width="60%" />
+<col width="39%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -782,7 +783,8 @@ Alternative Prior</h1>
 <td align="left">Power prior (calibrated)</td>
 </tr>
 <tr class="odd">
-<td align="left">FDA enthusiastic/sceptical pair required</td>
+<td align="left">Enthusiastic/sceptical pair for sensitivity
+analysis</td>
 <td align="left">Sceptical prior as second arm</td>
 </tr>
 </tbody>

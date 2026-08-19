@@ -183,7 +183,7 @@ kable(data.frame(
     "Mild conflict detected",
     "Severe conflict detected",
     "Historical data available",
-    "FDA enthusiastic/sceptical pair required"
+    "Enthusiastic/sceptical pair for sensitivity analysis"
   ),
   `Recommended prior` = c(
     "Robust mixture (w = 0.20)",

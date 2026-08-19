@@ -80,10 +80,10 @@ kable(data.frame(
     "Regulatory report generated"
   ),
   `FDA Guidance Section` = c(
-    "Section IV.B", "Section IV.B", "Section IV.B",
-    "Section IV.B", "Section IV.C", "Section IV.C",
-    "Section IV.D", "Section IV.D", "Section IV.D",
-    "Section IV.D", "Section IV.E"
+    "Section V.A", "Section V.A", "Section V.D",
+    "Section V.A", "Section V.D", "Section VIII.B",
+    "Section V.F", "Section V.F", "Section V.F",
+    "Section V.C", "Section VIII"
   ),
   check.names = FALSE
 ), align = "ll")

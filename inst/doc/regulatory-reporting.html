@@ -12,7 +12,7 @@
 
 <meta name="author" content="Ndoh Penn" />
 
-<meta name="date" content="2026-07-30" />
+<meta name="date" content="2026-08-19" />
 
 <title>Regulatory Reporting</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Regulatory Reporting</h1>
 <h4 class="author">Ndoh Penn</h4>
-<h4 class="date">2026-07-30</h4>
+<h4 class="date">2026-08-19</h4>
 
 
 <div id="TOC">
@@ -365,10 +365,9 @@ Checklist</a></li>
 
 <div id="regulatory-context" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Regulatory Context</h1>
-<p>The FDA Draft Guidance on Bayesian Statistical Methods for Drug and
-Biological Products (2026) and the EMA Reflection Paper on Bayesian
-Statistics both require that Bayesian prior distributions used in
-confirmatory clinical trials be:</p>
+<p>The FDA’s 2026 draft guidance, <em>Use of Bayesian Methodology in
+Clinical Trials of Drug and Biological Products</em>, calls for Bayesian
+prior distributions used in confirmatory clinical trials to be:</p>
 <ol style="list-style-type: decimal">
 <li><strong>Explicitly specified</strong> — family, hyperparameters, and
 elicitation method</li>
@@ -378,9 +377,19 @@ historical data, or both)</li>
 compatible</li>
 <li><strong>Sensitivity-tested</strong> — conclusions hold under
 plausible alternative priors</li>
-<li><strong>Pre-specified</strong> — agreed with regulators before
-unblinding</li>
 </ol>
+<p>The EMA has not yet published guidance specific to Bayesian methods:
+as of 2026, a concept paper proposing the development of a reflection
+paper on the use of Bayesian methods in clinical development
+(EMA/CHMP/1813/2026) has been released for consultation, with the draft
+reflection paper itself not expected until 2027 and final publication in
+2028. Separately, EMA’s existing reflection paper on extrapolation in
+paediatric drug development already requires sponsors incorporating
+external or historical data to quantify the prior’s influence relative
+to the observed data and to investigate the resulting Type I error
+properties — themes consistent with points 2-4 above. 5.
+<strong>Pre-specified</strong> — agreed with regulators before
+unblinding</p>
 <p><code>prior_report()</code> generates a self-contained document
 addressing all five requirements.</p>
 <hr />
@@ -545,10 +554,10 @@ each section to specific regulatory requirements:</p>
 <span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>    <span class="st">&quot;Regulatory report generated&quot;</span></span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  ),</span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  <span class="st">`</span><span class="at">FDA Guidance Section</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>    <span class="st">&quot;Section IV.B&quot;</span>, <span class="st">&quot;Section IV.B&quot;</span>, <span class="st">&quot;Section IV.B&quot;</span>,</span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    <span class="st">&quot;Section IV.B&quot;</span>, <span class="st">&quot;Section IV.C&quot;</span>, <span class="st">&quot;Section IV.C&quot;</span>,</span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>    <span class="st">&quot;Section IV.D&quot;</span>, <span class="st">&quot;Section IV.D&quot;</span>, <span class="st">&quot;Section IV.D&quot;</span>,</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>    <span class="st">&quot;Section IV.D&quot;</span>, <span class="st">&quot;Section IV.E&quot;</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>    <span class="st">&quot;Section V.A&quot;</span>, <span class="st">&quot;Section V.A&quot;</span>, <span class="st">&quot;Section V.D&quot;</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    <span class="st">&quot;Section V.A&quot;</span>, <span class="st">&quot;Section V.D&quot;</span>, <span class="st">&quot;Section VIII.B&quot;</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>    <span class="st">&quot;Section V.F&quot;</span>, <span class="st">&quot;Section V.F&quot;</span>, <span class="st">&quot;Section V.F&quot;</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>    <span class="st">&quot;Section V.C&quot;</span>, <span class="st">&quot;Section VIII&quot;</span></span>
 <span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  ),</span>
 <span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
 <span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>), <span class="at">align =</span> <span class="st">&quot;ll&quot;</span>)</span></code></pre></div>
@@ -562,47 +571,47 @@ each section to specific regulatory requirements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">Prior elicitation method documented</td>
-<td align="left">Section IV.B</td>
+<td align="left">Section V.A</td>
 </tr>
 <tr class="even">
 <td align="left">Distribution family and parameters specified</td>
-<td align="left">Section IV.B</td>
+<td align="left">Section V.A</td>
 </tr>
 <tr class="odd">
 <td align="left">Expert / source of prior identified</td>
-<td align="left">Section IV.B</td>
+<td align="left">Section V.D</td>
 </tr>
 <tr class="even">
 <td align="left">Prior density plot provided</td>
-<td align="left">Section IV.B</td>
+<td align="left">Section V.A</td>
 </tr>
 <tr class="odd">
 <td align="left">Prior-data conflict assessed</td>
-<td align="left">Section IV.C</td>
+<td align="left">Section V.D</td>
 </tr>
 <tr class="even">
 <td align="left">Conflict diagnostic statistics reported</td>
-<td align="left">Section IV.C</td>
+<td align="left">Section VIII.B</td>
 </tr>
 <tr class="odd">
 <td align="left">Sensitivity analysis performed</td>
-<td align="left">Section IV.D</td>
+<td align="left">Section V.F</td>
 </tr>
 <tr class="even">
 <td align="left">Sensitivity visualisations provided</td>
-<td align="left">Section IV.D</td>
+<td align="left">Section V.F</td>
 </tr>
 <tr class="odd">
 <td align="left">Alternative priors considered</td>
-<td align="left">Section IV.D</td>
+<td align="left">Section V.F</td>
 </tr>
 <tr class="even">
 <td align="left">Robust / sceptical prior computed</td>
-<td align="left">Section IV.D</td>
+<td align="left">Section V.C</td>
 </tr>
 <tr class="odd">
 <td align="left">Regulatory report generated</td>
-<td align="left">Section IV.E</td>
+<td align="left">Section VIII</td>
 </tr>
 </tbody>
 </table>
@@ -708,10 +717,11 @@ rationale</label></li>
 </div>
 <div id="references" class="section level1" number="9">
 <h1><span class="header-section-number">9</span> References</h1>
-<p>FDA (2026). <em>Draft Guidance for Industry: Bayesian Statistical
-Methods for Drug and Biological Products</em>.</p>
-<p>EMA (2023). <em>Reflection Paper on the Use of Bayesian Statistics in
-the Evaluation of Medicinal Products</em>.</p>
+<p>FDA (2026). <em>Use of Bayesian Methodology in Clinical Trials of
+Drug and Biological Products</em> (Draft Guidance for Industry).</p>
+<p>EMA (2026). <em>Concept Paper for the Development of a Reflection
+Paper on the Use of Bayesian Methods in Clinical Development</em>
+(EMA/CHMP/1813/2026).</p>
 <p>O’Hagan, A. et al. (2006). <em>Uncertain Judgements: Eliciting
 Experts’ Probabilities</em>. Wiley.</p>
 <p>Spiegelhalter, D. J. &amp; Freedman, L. S. (1994). Bayesian
