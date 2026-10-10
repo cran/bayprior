@@ -1,3 +1,90 @@
+# bayprior 0.4.0
+
+## New features
+
+* `prior_conflict()` gains an `exact` argument (default `FALSE`, matching
+  prior behaviour exactly). `exact = TRUE` replaces the Normal
+  approximation to the prior and to the data likelihood -- used by
+  default for `box_pvalue` and the `s_value` derived from it -- with the
+  exact prior predictive distribution, for the prior family/data-type
+  combinations where one has a closed form: Beta-Binomial (a Beta
+  prior against `type = "binary"` data) and Gamma-Poisson/Negative
+  Binomial (a Gamma prior against `type = "poisson"` or
+  `type = "survival"` data -- both reduce to the same events/exposure
+  model, so one exact check covers both). The Normal-Normal case
+  (`type = "continuous"` against a Normal prior) was already exact and
+  needs no separate path. For prior family/data-type
+  combinations with no closed-form check implemented, `exact = TRUE`
+  falls back to the Normal approximation with a message rather than
+  erroring; `$box_pvalue_method` on the returned object reports which was
+  used ("exact" or "normal_approx"). `surprise_index`,
+  `kl_prior_likelihood`, and `overlap` are unaffected by `exact`, since
+  they are defined with respect to the Normal-approximated prior and
+  likelihood regardless.
+
+* Added `map_prior()`: derives a meta-analytic-predictive (MAP) prior from
+  historical trial summaries via a random-effects meta-analysis, with an
+  explicit prior on the between-trial heterogeneity parameter tau
+  (Schmidli et al., 2014). The meta-analysis engine is implemented
+  entirely in base R: the posterior of mu given tau has a closed form, so
+  the only numerical step is a one-dimensional integral over tau
+  (`stats::integrate()`/`stats::optimize()`/`stats::uniroot()`, all base
+  R) -- `bayprior` has no dependency, direct or optional, on any external
+  meta-analysis package for this. `outcome_type` presets select the
+  default tau prior from Roever et al. (2021)'s outcome-specific
+  recommendations, distinguishing a single-arm log-odds case (e.g.
+  historical control response rates -- the typical MAP use case) from a
+  two-arm log-odds ratio case, which get different default
+  heterogeneity-prior scales despite both being "log-odds" in casual
+  speech.
+
+* Added `historical_effect_sizes()`, a thin wrapper around
+  `metafor::escalc()` (`Suggests`, not `Imports`) that converts raw
+  per-trial summary statistics (event counts, arm means/SDs, ...) into
+  the `y`/`se` inputs `map_prior()` expects, across all six supported
+  `outcome_type`s.
+
+* Added a Shiny module for `map_prior()`, "MAP Prior (Historical)", as
+  its own top-level sidebar item alongside "Prior Elicitation" and
+  "Expert Pooling" -- reflecting that MAP derivation is an alternative
+  way to construct a base informative prior, not a robustness adjustment
+  applied to one (Robust Mixture, Sceptical, and Power Prior all take an
+  existing base prior as input; MAP produces one). Its step-completion
+  indicator is tracked independently of Robust Priors' own.
+
+* `prior_conflict()` now also reports `s_value`, the surprisal
+  `-log2(box_pvalue)` in bits -- an exploratory,
+  continuous companion to the existing Box p-value / thresholded
+  `conflict_severity` classification, since prior-data conflict checks are
+  typically not powered for a binary accept/reject decision. Reported
+  alongside (not instead of) the existing diagnostics in the console
+  `print()` method, the Shiny Conflict Diagnostics tab, and the
+  `prior_report()` regulatory report.
+
+## Shiny app
+
+* Restyled the app around the package palette (navy and emerald). The
+  stylesheet `custom.css` shipped with the app but was never linked, so
+  it had no effect; it is now loaded, with dark-mode variants. Result
+  tiles, box headers, alerts, and notifications use colour for status
+  only, and text colours were checked for WCAG AA contrast.
+
+* The Welcome page workflow diagram is now live: steps link to their
+  panels and show completed steps. A "Start here" panel (elicit, derive
+  from historical trials, or load the TRIAL-001 example) becomes "Next
+  steps" once a prior exists. The Report step is marked complete after a
+  report is generated and reopens when the prior or any analysis changes.
+
+* Fitting a prior (Parametric, Roulette, or MAP) while a pooled consensus
+  prior is active now asks whether to replace the consensus or keep it,
+  instead of leaving downstream steps on the old consensus without notice.
+
+* Fixed a JavaScript error in the theme-toggle script, which ran before
+  the page body existed and stopped the rest of the script from loading.
+  The Auto / Dark / Light button label now shows correctly on load.
+
+---
+
 # bayprior 0.3.2
 
 ## Bug fixes
@@ -63,6 +150,15 @@
   same working-prior logic as the underlying function, so the interface's
   suggested ranges no longer risk diverging from what is actually
   analyzed.
+
+* Corrected the documented meaning of `null_value` for
+  `sceptical_prior(..., family = "lognormal")`: it must be supplied on
+  the log scale (e.g. 0 for a null hazard ratio of 1), not the natural
+  scale implied by the previous generic parameter documentation.
+
+* Fixed `conflict_mahalanobis()`'s documented return field names
+  (`mahal_d2`, `p_value`), which did not match the object's actual field
+  names (`mahal_D2`, `pvalue`).
 
 ---
 

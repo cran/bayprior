@@ -86,6 +86,19 @@ mix <- elicit_mixture(
 )
 plot(mix)
 
+## ----map-prior-intro----------------------------------------------------------
+# Five historical control-arm trials, single-arm log-odds scale.
+y_hist  <- c(0.10, -0.05, 0.22, 0.05, 0.15)
+se_hist <- c(0.12, 0.15, 0.10, 0.18, 0.14)
+
+map <- map_prior(
+  y_hist, se_hist,
+  outcome_type = "single_arm_log_odds",
+  label        = "Historical control (MAP)"
+)
+print(map)
+plot_tau_posterior(map)
+
 ## ----conflict-----------------------------------------------------------------
 prior <- elicit_beta(
   mean   = 0.30,

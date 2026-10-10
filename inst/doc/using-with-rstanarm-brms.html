@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Ndoh Penn" />
+
+<meta name="date" content="2026-10-09" />
+
+<title>Using bayprior Priors with rstanarm and brms</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using bayprior Priors with rstanarm and
+brms</h1>
+<h4 class="author">Ndoh Penn</h4>
+<h4 class="date">2026-10-09</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#overview" id="toc-overview"><span class="toc-section-number">1</span> Overview</a></li>
+<li><a href="#deriving-the-prior" id="toc-deriving-the-prior"><span class="toc-section-number">2</span> Deriving the prior</a></li>
+<li><a href="#handoff-to-rstanarm" id="toc-handoff-to-rstanarm"><span class="toc-section-number">3</span> Handoff to rstanarm</a></li>
+<li><a href="#handoff-to-brms" id="toc-handoff-to-brms"><span class="toc-section-number">4</span> Handoff to brms</a></li>
+<li><a href="#summary" id="toc-summary"><span class="toc-section-number">5</span> Summary</a></li>
+</ul>
+</div>
+
+<div id="overview" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Overview</h1>
+<p>bayprior handles prior specification, elicitation, pooling, and
+diagnostics; it does not fit posterior models itself. This vignette
+shows how to take a bayprior prior object’s fitted hyperparameters and
+hand them to <code>rstanarm</code> or <code>brms</code> for the
+model-fitting step, using the same historical-trial data as the MAP
+Priors example in the package’s main vignette and companion paper.</p>
+<p>Both <code>rstanarm</code> and <code>brms</code> are Suggested, not
+Imported, dependencies: this vignette’s code only runs if both are
+installed.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>have_rstanarm <span class="ot">&lt;-</span> <span class="fu">requireNamespace</span>(<span class="st">&quot;rstanarm&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>have_brms     <span class="ot">&lt;-</span> <span class="fu">requireNamespace</span>(<span class="st">&quot;brms&quot;</span>,     <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>have_deps     <span class="ot">&lt;-</span> have_rstanarm <span class="sc">&amp;&amp;</span> have_brms</span></code></pre></div>
+</div>
+<div id="deriving-the-prior" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Deriving the prior</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(bayprior)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">map_prior</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">y            =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.85</span>, <span class="sc">-</span><span class="fl">0.62</span>, <span class="sc">-</span><span class="fl">1.10</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">se           =</span> <span class="fu">c</span>(<span class="fl">0.25</span>, <span class="fl">0.30</span>, <span class="fl">0.28</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">outcome_type =</span> <span class="st">&quot;single_arm_log_odds&quot;</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">label        =</span> <span class="st">&quot;Historical control (3 trials)&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>mu    <span class="ot">&lt;-</span> map<span class="sc">$</span>fit_summary<span class="sc">$</span>mean</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> map<span class="sc">$</span>fit_summary<span class="sc">$</span>sd</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">c</span>(<span class="at">mu =</span> mu, <span class="at">sigma =</span> sigma)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;         mu      sigma </span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; -0.8618678  0.3349206</span></span></code></pre></div>
+<p><code>map$dist</code> is <code>&quot;normal&quot;</code>, and
+<code>mu</code>/<code>sigma</code> are its mean and SD on the
+<strong>log-odds scale</strong> – exactly the scale a
+logistic-regression intercept uses. This is what makes the handoff below
+possible without any distributional-family conversion: both packages
+already expect a Normal prior on that scale for an intercept term.</p>
+</div>
+<div id="handoff-to-rstanarm" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Handoff to
+rstanarm</h1>
+<p><code>rstanarm::normal()</code> evaluates its
+<code>location</code>/<code>scale</code> arguments as ordinary R
+expressions, so <code>mu</code> and <code>sigma</code> can be passed
+directly. Setting <code>autoscale = FALSE</code> is important:
+<code>rstanarm</code> otherwise may rescale the SD you supplied relative
+to the data before fitting, which would silently change the prior
+bayprior computed.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(rstanarm)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># A toy current-trial dataset, sized only to keep this vignette&#39;s build</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># time short -- substitute your own trial data in practice.</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>n_trial  <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>p_trial  <span class="ot">&lt;-</span> <span class="fl">0.32</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> <span class="fu">rbinom</span>(n_trial, <span class="dv">1</span>, p_trial))</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Wrapped in tryCatch so an incomplete local C++/Stan toolchain degrades</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co"># this vignette gracefully (a build failure here would otherwise fail</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># R CMD check on such a machine) rather than as a claim this code is</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co"># untested -- it has been run successfully end to end where the toolchain</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co"># is complete.</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>fit_rstanarm <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  <span class="fu">stan_glm</span>(</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    y <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="at">data            =</span> dat,</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    <span class="at">family          =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>    <span class="at">prior_intercept =</span> <span class="fu">normal</span>(<span class="at">location =</span> mu, <span class="at">scale =</span> sigma, <span class="at">autoscale =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="at">chains          =</span> <span class="dv">1</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="at">iter            =</span> <span class="dv">500</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    <span class="at">refresh         =</span> <span class="dv">0</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>    <span class="at">seed            =</span> <span class="dv">1</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>  ),</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>  <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Model fit skipped (local Stan toolchain issue): &quot;</span>, <span class="fu">conditionMessage</span>(e))</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>    <span class="cn">NULL</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>  }</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>)</span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(fit_rstanarm)) <span class="fu">print</span>(fit_rstanarm, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; stan_glm</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt;  family:       binomial [logit]</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt;  formula:      y ~ 1</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt;  observations: 40</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="co">#&gt;  predictors:   1</span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co">#&gt; ------</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="co">#&gt;             Median MAD_SD</span></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="co">#&gt; (Intercept) -0.794  0.211</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co">#&gt; ------</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="co">#&gt; * For help interpreting the printed output see ?print.stanreg</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co">#&gt; * For info on the priors used see ?prior_summary.stanreg</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;rstanarm not installed -- skipping this demo.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+<div id="handoff-to-brms" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Handoff to brms</h1>
+<p><code>brms::prior()</code> is <strong>not</strong> a drop-in
+replacement here: it captures its argument by non-standard evaluation
+and stores it as literal text, so
+<code>brms::prior(normal(mu, sigma), class = &quot;Intercept&quot;)</code> would
+store the string <code>&quot;normal(mu, sigma)&quot;</code> – the variable
+<em>names</em>, not their values – and fail at fit time.
+<code>brms::prior_string()</code> builds the prior specification from an
+already-evaluated R string instead, and is the reliable way to pass
+numeric values programmatically:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(brms)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>prior_spec <span class="ot">&lt;-</span> <span class="fu">prior_string</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">&quot;normal(&quot;</span>, mu, <span class="st">&quot;,&quot;</span>, sigma, <span class="st">&quot;)&quot;</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">class =</span> <span class="st">&quot;Intercept&quot;</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>prior_spec</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; Intercept ~ normal(-0.861867808691721,0.334920636951119)</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co"># See the rstanarm chunk above for why this is wrapped in tryCatch.</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>fit_brms <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="fu">brm</span>(</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>    y <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>    <span class="at">data    =</span> dat,</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>    <span class="at">family  =</span> <span class="fu">bernoulli</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>    <span class="at">prior   =</span> prior_spec,</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>    <span class="at">chains  =</span> <span class="dv">1</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>    <span class="at">iter    =</span> <span class="dv">500</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>    <span class="at">seed    =</span> <span class="dv">1</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>    <span class="at">silent  =</span> <span class="dv">2</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  ),</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Model fit skipped (local Stan toolchain issue): &quot;</span>, <span class="fu">conditionMessage</span>(e))</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    <span class="cn">NULL</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  }</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>)</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(fit_brms)) <span class="fu">summary</span>(fit_brms)</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt;  Family: bernoulli </span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt;   Links: mu = logit </span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; Formula: y ~ 1 </span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt;    Data: dat (Number of observations: 40) </span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt;   Draws: 1 chains, each with iter = 500; warmup = 250; thin = 1;</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="co">#&gt;          total post-warmup draws = 250</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a><span class="co">#&gt; Regression Coefficients:</span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="co">#&gt;           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="co">#&gt; Intercept    -0.84      0.23    -1.32    -0.45 1.01       97       66</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;brms not installed -- skipping this demo.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+<div id="summary" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Summary</h1>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Package</th>
+<th>Correct call</th>
+<th>Common mistake</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>rstanarm</code></td>
+<td><code>normal(location = mu, scale = sigma, autoscale = FALSE)</code></td>
+<td>Omitting <code>autoscale = FALSE</code> lets rstanarm silently
+rescale the SD</td>
+</tr>
+<tr class="even">
+<td><code>brms</code></td>
+<td><code>prior_string(paste0(&quot;normal(&quot;, mu, &quot;,&quot;, sigma, &quot;)&quot;), class = &quot;Intercept&quot;)</code></td>
+<td><code>prior(normal(mu, sigma), ...)</code> stores the variable names
+as text, not their values</td>
+</tr>
+</tbody>
+</table>
+<p>Both handoffs apply specifically to an <strong>intercept</strong>
+term representing the same quantity <code>map_prior()</code> (or an
+elicited prior on the log-odds scale) was fit to – not to
+slope/coefficient priors (<code>class = &quot;b&quot;</code> in <code>brms</code>,
+<code>prior =</code> in <code>rstanarm</code>), which are on a different
+parameter and should not receive these values unmodified.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

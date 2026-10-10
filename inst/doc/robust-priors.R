@@ -67,6 +67,58 @@ cat("Narrow vague SD: ", round(rob_narrow$components$vague$fit_summary$sd, 3), "
 cat("Default vague SD:", round(rob$components$vague$fit_summary$sd, 3), "\n")
 cat("Wide vague SD:   ", round(rob_wide$components$vague$fit_summary$sd, 3), "\n")
 
+## ----map-prior----------------------------------------------------------------
+# Five historical control-arm trials -- i.e. a single-arm log-odds scale,
+# not a two-arm log-odds RATIO. This distinction matters: see below.
+y  <- c(0.10, -0.05, 0.22, 0.05, 0.15)
+se <- c(0.12, 0.15, 0.10, 0.18, 0.14)
+
+map <- map_prior(
+  y, se,
+  outcome_type = "single_arm_log_odds",
+  label        = "Historical control (log-odds)"
+)
+print(map)
+
+## ----map-into-robust----------------------------------------------------------
+rob_map <- robust_prior(map, vague_weight = 0.20)
+plot(rob_map)
+
+## ----historical-effect-sizes, eval=requireNamespace("metafor", quietly = TRUE)----
+# The same five trials as above, but as originally reported -- event
+# counts (xi out of ni) rather than pre-computed log-odds estimates.
+trials <- data.frame(
+  xi = c(11, 9, 14, 10, 12),
+  ni = c(45, 40, 55, 48, 42)
+)
+es <- historical_effect_sizes("single_arm_log_odds", trials)
+es[, c("xi", "ni", "y", "se")]
+
+map_from_counts <- map_prior(
+  y = es$y, se = es$se,
+  outcome_type = "single_arm_log_odds",
+  label        = "Historical control (from raw counts)"
+)
+print(map_from_counts)
+
+## ----tau-presets--------------------------------------------------------------
+resolve_tau_prior("log_or")               # two-arm log-odds ratio
+resolve_tau_prior("single_arm_log_odds")  # e.g. a historical control rate
+
+## ----map-tau-sensitivity------------------------------------------------------
+# An explicit tau_prior always overrides the outcome_type preset, and is
+# required (map_prior() errors otherwise) for "mean_difference".
+map_tight <- map_prior(y, se, tau_prior = list(family = "half_normal", scale = 0.1))
+map_wide  <- map_prior(y, se, tau_prior = list(family = "half_normal", scale = 1.0))
+
+cat("Tight tau prior -- posterior SD:", round(map_tight$fit_summary$sd, 4), "\n")
+cat("Wide tau prior  -- posterior SD:", round(map_wide$fit_summary$sd, 4), "\n")
+
+## ----map-tau-posterior--------------------------------------------------------
+plot(map$tau_posterior$tau, map$tau_posterior$density, type = "l",
+     xlab = expression(tau), ylab = "Posterior density",
+     main = "Posterior distribution of the heterogeneity SD")
+
 ## ----sceptical-normal---------------------------------------------------------
 sc_weak <- sceptical_prior(
   null_value = 0, family = "normal", strength = "weak",

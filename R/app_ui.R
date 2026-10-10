@@ -73,6 +73,11 @@ app_ui <- function(request) {
             icon     = icon("users")
           ),
           shinydashboard::menuItem(
+            tagList("MAP Prior (Historical)", uiOutput("step_badge_map", inline = TRUE)),
+            tabName  = "map_prior",
+            icon     = icon("hospital")
+          ),
+          shinydashboard::menuItem(
             tagList("Conflict Diagnostics", uiOutput("step_badge_conflict", inline = TRUE)),
             icon     = icon("vial"),
             tabName  = "conflict",
@@ -112,19 +117,10 @@ app_ui <- function(request) {
         # Active prior badge + version footer
         tags$div(
           style = "position:absolute; bottom:0; width:100%; padding:4px 0;",
-          tags$div(
-            style = paste0(
-              "font-size:10px; color:#aaa; text-transform:uppercase;",
-              "letter-spacing:0.8px; padding:0 12px 2px;"
-            ),
-            "Active prior:"
-          ),
+          tags$div(class = "bp-side-label", "Active prior"),
           uiOutput("sidebar_prior_badge"),
           tags$div(
-            style = paste0(
-              "font-size:9px; color:#666; text-align:center;",
-              "padding:4px 0 6px; border-top:1px solid #333; margin-top:4px;"
-            ),
+            class = "bp-side-version",
             paste0("bayprior v",
                    tryCatch(as.character(utils::packageVersion("bayprior")),
                             error = function(e) "dev"))
@@ -203,7 +199,7 @@ app_ui <- function(request) {
                   '<span style=\"font-size:9px;opacity:0.6;margin-left:4px;\">' +
                   (osDark ? '(dark)' : '(light)') + '</span>';
               }
-              if (window.Shiny)
+              if (window.Shiny && typeof Shiny.setInputValue === 'function')
                 Shiny.setInputValue('app_theme', isDark() ? 'dark' : 'light',
                                     {priority:'event'});
             }
@@ -220,6 +216,11 @@ app_ui <- function(request) {
               applyThemeState(next);
             }
 
+            // This script sits in <head>, where document.body does not exist
+            // yet; touching body.classList there threw and aborted everything
+            // below it (OS listener, label sync, app_theme input). Defer the
+            // body-dependent set-up until the body is available.
+            function bpThemeBoot() {
             // -- Initialise on page load -------------------------------------
             // Migration: earlier two-state toggle saved 'light' on first
             // load without explicit user action. Clear stale preferences
@@ -264,6 +265,9 @@ app_ui <- function(request) {
                 applyThemeState(getThemeState()); // final apply
               }, { once: true });
             })();
+            }
+            if (document.body) { bpThemeBoot(); }
+            else { document.addEventListener('DOMContentLoaded', bpThemeBoot); }
 
             // -- React to OS changes at runtime ------------------------------
             // Only applies when in Auto mode (no manual preference saved)
@@ -282,7 +286,7 @@ app_ui <- function(request) {
             });
 
             document.addEventListener('shiny:connected', function() {
-              if (window.Shiny)
+              if (window.Shiny && typeof Shiny.setInputValue === 'function')
                 Shiny.setInputValue('app_theme', isDark() ? 'dark' : 'light',
                                     {priority:'event'});
             });
@@ -312,6 +316,40 @@ app_ui <- function(request) {
           }
           .btn-tip-wrap:hover .btn-tip-text {
             visibility: visible; opacity: 1;
+          }
+          /* Longer info-icon tooltips (valueBox metric explanations) reuse
+             .btn-tip-wrap as their hover trigger, but need to wrap onto
+             multiple lines within a fixed width instead of .btn-tip-text's
+             single-line nowrap -- which, for a long sentence, stretched
+             far past the viewport instead of just overflowing off-screen. */
+          .btn-tip-wrap .info-tip-text {
+            visibility: hidden; opacity: 0;
+            background: #333; color: #fff;
+            font-size: 11px; line-height: 1.4; text-align: left;
+            border-radius: 4px; padding: 6px 10px;
+            white-space: normal; width: 220px; max-width: 70vw;
+            position: absolute; bottom: 125%; left: 50%;
+            transform: translateX(-50%);
+            transition: opacity 0.15s;
+            z-index: 9999; pointer-events: none;
+          }
+          .btn-tip-wrap:hover .info-tip-text {
+            visibility: visible; opacity: 1;
+          }
+          /* shinydashboard's valueBox() draws a large decorative icon
+             (.icon-large) that, in a narrow box (these are width=3 of 12),
+             visually and functionally overlaps the small info-icon placed
+             in the title text -- and because .icon-large comes later in
+             the DOM, it sits on top and swallows all pointer events there,
+             so .btn-tip-wrap:hover never fires no matter how precisely the
+             cursor is placed over the info icon. Confirmed via a headless
+             browser: hovering the info icon times out with 'i.fa-dice ...
+             subtree intercepts pointer events'. A purely decorative
+             background icon should never block interaction with content
+             drawn in front of it. */
+          .small-box .icon-large,
+          .small-box .icon-large-icon {
+            pointer-events: none;
           }
         ")),
 
@@ -362,9 +400,9 @@ app_ui <- function(request) {
               t.className = 'bp-toast' +
                 (type === 'error' ? ' bp-toast-error' :
                  type === 'warn'  ? ' bp-toast-warn'  : '');
-              t.innerHTML = (type === 'error' ? '<i class=\'fa fa-circle-xmark\'></i> ' :
-                             type === 'warn'  ? '<i class=\'fa fa-triangle-exclamation\'></i> ' :
-                                               '<i class=\'fa fa-circle-check\'></i> ') + msg;
+              t.innerHTML = (type === 'error' ? '<i class=\"fa fa-circle-xmark\"></i> ' :
+                             type === 'warn'  ? '<i class=\"fa fa-triangle-exclamation\"></i> ' :
+                                               '<i class=\"fa fa-circle-check\"></i> ') + msg;
               container.appendChild(t);
               setTimeout(function() {
                 t.style.animation = 'bp-slide-out 0.25s ease forwards';
@@ -414,6 +452,10 @@ app_ui <- function(request) {
             mod_pooling_ui("pooling")
           ),
           shinydashboard::tabItem(
+            tabName = "map_prior",
+            mod_map_prior_ui("map_prior")
+          ),
+          shinydashboard::tabItem(
             tabName = "conflict",
             mod_conflict_ui("conflict")
           ),
@@ -456,7 +498,11 @@ golem_add_external_resources <- function() {
               href = "www/favicon.png"),
     tags$link(rel = "shortcut icon", type = "image/png",
               href = "www/favicon.png"),
+    # Theme tokens first, dark-mode overrides second (same specificity rules,
+    # so order matters).
     tags$link(rel = "stylesheet", type = "text/css",
-               href = "www/bayprior-dark.css")
+              href = "www/custom.css"),
+    tags$link(rel = "stylesheet", type = "text/css",
+              href = "www/bayprior-dark.css")
   )
 }

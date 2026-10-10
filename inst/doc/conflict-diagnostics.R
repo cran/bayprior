@@ -34,6 +34,22 @@ cd_severe <- prior_conflict(
 )
 print(cd_severe)
 
+## ----exact-binary-------------------------------------------------------------
+cd_approx <- prior_conflict(
+  prior        = prior,
+  data_summary = list(type = "binary", x = 35, n = 40)
+)
+cd_exact <- prior_conflict(
+  prior        = prior,
+  data_summary = list(type = "binary", x = 35, n = 40),
+  exact        = TRUE
+)
+data.frame(
+  method     = c(cd_approx$box_pvalue_method, cd_exact$box_pvalue_method),
+  box_pvalue = signif(c(cd_approx$box_pvalue, cd_exact$box_pvalue), 3),
+  s_value    = round(c(cd_approx$s_value, cd_exact$s_value), 1)
+)
+
 ## ----thresholds, echo=FALSE---------------------------------------------------
 knitr::kable(data.frame(
   Diagnostic        = c("Box p-value", "Surprise index",
