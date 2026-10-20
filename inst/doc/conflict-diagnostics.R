@@ -37,12 +37,12 @@ print(cd_severe)
 ## ----exact-binary-------------------------------------------------------------
 cd_approx <- prior_conflict(
   prior        = prior,
-  data_summary = list(type = "binary", x = 35, n = 40)
+  data_summary = list(type = "binary", x = 35, n = 40),
+  exact        = FALSE
 )
 cd_exact <- prior_conflict(
   prior        = prior,
-  data_summary = list(type = "binary", x = 35, n = 40),
-  exact        = TRUE
+  data_summary = list(type = "binary", x = 35, n = 40)   # default: exact
 )
 data.frame(
   method     = c(cd_approx$box_pvalue_method, cd_exact$box_pvalue_method),

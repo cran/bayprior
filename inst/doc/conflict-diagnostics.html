@@ -12,7 +12,7 @@
 
 <meta name="author" content="Ndoh Penn" />
 
-<meta name="date" content="2026-10-09" />
+<meta name="date" content="2026-10-20" />
 
 <title>Prior-Data Conflict Diagnostics</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Prior-Data Conflict Diagnostics</h1>
 <h4 class="author">Ndoh Penn</h4>
-<h4 class="date">2026-10-09</h4>
+<h4 class="date">2026-10-20</h4>
 
 
 
@@ -440,23 +440,30 @@ continuous, Poisson/count, and survival.</p>
 0.05\)</span> flags conflict at the 5% level.</p>
 <div id="exact-prior-predictive-version" class="section level3">
 <h3>Exact prior predictive version</h3>
-<p>By default the p-value above uses a Normal approximation to the prior
-and to the likelihood. Setting <code>exact = TRUE</code> replaces it
-with the exact prior predictive distribution where one has a closed
-form: Beta-Binomial (a Beta prior with <code>type = &quot;binary&quot;</code>
-data) and Gamma-Poisson / Negative Binomial (a Gamma prior with
-<code>type = &quot;poisson&quot;</code> or <code>&quot;survival&quot;</code> data). The
-approximation is usually adequate, but it can differ noticeably for
-small samples, extreme proportions, or sparse counts, which are exactly
-the cases where a regulator may ask how the p-value was obtained.</p>
+<p>The formula above is the Normal approximation to the prior and to the
+likelihood. Where the prior predictive distribution has a closed form,
+<code>prior_conflict()</code> uses it instead by default: Beta-Binomial
+(a Beta prior with <code>type = &quot;binary&quot;</code> data) and Gamma-Poisson
+/ Negative Binomial (a Gamma prior with <code>type = &quot;poisson&quot;</code> or
+<code>&quot;survival&quot;</code> data). The approximation is usually adequate for
+moderate samples and weakly informative priors, but for an informative
+prior and a small sample it can flag conflict much more often than its
+nominal level when there is none (for example when zero events are
+observed, which the approximation treats as having zero sampling
+variability). The exact version does not have this problem: it is the
+prior predictive check of Box (1980) in the form used by Evans and
+Moshonov (2006), the total prior predictive probability of outcomes no
+more probable than the observed one. Use <code>exact = FALSE</code> to
+obtain the approximation, for instance to reproduce results from
+bayprior 0.4.0 or earlier.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>cd_approx <span class="ot">&lt;-</span> <span class="fu">prior_conflict</span>(</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">prior        =</span> prior,</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">data_summary =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;binary&quot;</span>, <span class="at">x =</span> <span class="dv">35</span>, <span class="at">n =</span> <span class="dv">40</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>)</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>cd_exact <span class="ot">&lt;-</span> <span class="fu">prior_conflict</span>(</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">prior        =</span> prior,</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">data_summary =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;binary&quot;</span>, <span class="at">x =</span> <span class="dv">35</span>, <span class="at">n =</span> <span class="dv">40</span>),</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">exact        =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">data_summary =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;binary&quot;</span>, <span class="at">x =</span> <span class="dv">35</span>, <span class="at">n =</span> <span class="dv">40</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">exact        =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>cd_exact <span class="ot">&lt;-</span> <span class="fu">prior_conflict</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">prior        =</span> prior,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">data_summary =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;binary&quot;</span>, <span class="at">x =</span> <span class="dv">35</span>, <span class="at">n =</span> <span class="dv">40</span>)   <span class="co"># default: exact</span></span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>)</span>
 <span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
 <span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="at">method     =</span> <span class="fu">c</span>(cd_approx<span class="sc">$</span>box_pvalue_method, cd_exact<span class="sc">$</span>box_pvalue_method),</span>
@@ -466,9 +473,9 @@ the cases where a regulator may ask how the p-value was obtained.</p>
 <pre><code>##          method box_pvalue s_value
 ## 1 normal_approx   3.48e-07    21.5
 ## 2         exact   5.74e-06    17.4</code></pre>
-<p>For prior and data combinations without a closed-form check,
-<code>exact = TRUE</code> falls back to the Normal approximation with a
-message, and <code>$box_pvalue_method</code> records which version was
+<p>For prior and data combinations without a closed-form check, the
+Normal approximation is used (with <code>exact = TRUE</code>, with a
+message), and <code>$box_pvalue_method</code> records which version was
 used (<code>&quot;exact&quot;</code> or <code>&quot;normal_approx&quot;</code>). The other
 diagnostics below are not affected by <code>exact</code>.</p>
 </div>
@@ -707,8 +714,14 @@ type, helping users avoid inadvertent misspecification:</p>
 </div>
 <div id="mixture-prior-conflict" class="section level1">
 <h1>Mixture Prior Conflict</h1>
-<p>All diagnostics work transparently with mixture priors via a Normal
-approximation from the mixture’s <code>fit_summary</code>:</p>
+<p>Mixture priors (robust priors, pooled consensus) are supported
+throughout. The Box p-value uses the mixture’s prior predictive
+distribution, the weighted mixture of the components’ predictives (exact
+for Beta or Gamma components; computed by numerical integration if a
+component such as the Normal vague part of a robust prior has no
+conjugate form, with that component truncated to the parameter space).
+The other diagnostics use a Normal approximation from the mixture’s
+<code>fit_summary</code>:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>e1 <span class="ot">&lt;-</span> <span class="fu">elicit_beta</span>(<span class="at">mean =</span> <span class="fl">0.25</span>, <span class="at">sd =</span> <span class="fl">0.08</span>, <span class="at">method =</span> <span class="st">&quot;moments&quot;</span>,</span>
 <span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>                  <span class="at">expert_id =</span> <span class="st">&quot;E1&quot;</span>, <span class="at">label =</span> <span class="st">&quot;ORR&quot;</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>e2 <span class="ot">&lt;-</span> <span class="fu">elicit_beta</span>(<span class="at">mean =</span> <span class="fl">0.40</span>, <span class="at">sd =</span> <span class="fl">0.12</span>, <span class="at">method =</span> <span class="st">&quot;moments&quot;</span>,</span>
@@ -770,6 +783,8 @@ estimates</td>
 <div id="references" class="section level1">
 <h1>References</h1>
 <ul>
+<li>Evans, M. and Moshonov, H. (2006). Checking for prior-data conflict.
+<em>Bayesian Analysis</em>, 1(4).</li>
 <li>Box, G. E. P. (1980). Sampling and Bayes’ inference in scientific
 modelling and robustness. <em>JRSS-A</em>, 143, 383–430.</li>
 <li>Bhattacharyya, A. (1943). On a measure of divergence between two

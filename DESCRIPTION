@@ -1,7 +1,7 @@
 Package: bayprior
 Title: Bayesian Prior Elicitation, Diagnostics, and Regulatory
         Reporting
-Version: 0.4.0
+Version: 0.5.0
 Authors@R: 
     person("Ndoh", "Penn", email = "ndohpenn9@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0003-9054-465X"))
@@ -10,8 +10,8 @@ Description: A toolkit for constructing, validating, and justifying Bayesian pri
   matching, the roulette method, and moment matching across six distribution
   families, linear and logarithmic expert pooling, meta-analytic-predictive
   (MAP) priors derived from historical trials, prior-data conflict
-  diagnostics including the Box p-value (with an exact prior predictive
-  option for selected prior and data combinations), an exploratory
+  diagnostics including the Box p-value (computed from the exact prior
+  predictive distribution where one has a closed form), an exploratory
   surprisal (S-value) companion to it, surprise index, information
   divergence, and Mahalanobis distance, sensitivity analyses with tornado
   and influence heatmap plots, sceptical, robust, and power priors, and
@@ -47,8 +47,8 @@ Language: en-GB
 RoxygenNote: 7.3.3
 SystemRequirements: Quarto CLI (>= 1.5, https://quarto.org)
 NeedsCompilation: no
-Packaged: 2026-10-09 20:07:24 UTC; ndohpenn
+Packaged: 2026-10-20 21:06:23 UTC; ndohpenn
 Author: Ndoh Penn [aut, cre] (ORCID: <https://orcid.org/0009-0003-9054-465X>)
 Maintainer: Ndoh Penn <ndohpenn9@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-10-10 15:00:26 UTC
+Date/Publication: 2026-10-20 21:30:02 UTC
